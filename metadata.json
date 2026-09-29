@@ -1,0 +1,6 @@
+{
+  "name": "Skrining Kesehatan Mental",
+  "description": "Alat tes online untuk skrining kesehatan mental (GHQ-12) dengan hasil analisis otomatis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
