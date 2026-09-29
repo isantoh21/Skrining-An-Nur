@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight, ArrowLeft, RefreshCw, ClipboardList, ShieldAlert, CheckCircle, Loader2, Instagram, Gift } from 'lucide-react';
+import { ArrowRight, ArrowLeft, RefreshCw, ShieldAlert, CheckCircle, Instagram, Gift } from 'lucide-react';
 import { questions } from './data';
 import { options, Answer } from './types';
 
@@ -11,7 +11,6 @@ export default function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
   const [userInfo, setUserInfo] = useState({ name: '', age: '', occupation: '', phone: '', instagram: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handlePhoneChange = (val: string) => {
     if (!val) {
@@ -48,41 +47,14 @@ export default function App() {
     setAnswers({});
   };
 
-  const handleAnswer = async (answer: Answer) => {
+  const handleAnswer = (answer: Answer) => {
     const newAnswers = { ...answers, [currentStep]: answer };
     setAnswers(newAnswers);
 
     if (currentStep < questions.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      const finalScore = Object.values(newAnswers).reduce((acc, val) => acc + val, 0);
-      const finalNeedsAttention = finalScore >= 19;
-
-      setIsSubmitting(true);
-      try {
-        await fetch('https://formsubmit.co/ajax/isantoh21@gmail.com', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            _subject: `Hasil Skrining GHQ-12: ${userInfo.name}`,
-            Nama: userInfo.name,
-            Usia: userInfo.age,
-            Pekerjaan: userInfo.occupation,
-            Nomor_HP: userInfo.phone,
-            Akun_Instagram: userInfo.instagram,
-            Skor_Total: finalScore,
-            Keterangan: finalNeedsAttention ? "Terdapat indikasi distres psikologis atau disfungsi sosial." : "Tidak menunjukkan indikasi distres psikologis yang signifikan."
-          })
-        });
-      } catch (error) {
-        console.error("Gagal mengirim hasil ke email", error);
-      } finally {
-        setIsSubmitting(false);
-        setScreen('result');
-      }
+      setScreen('result');
     }
   };
 
@@ -250,7 +222,7 @@ export default function App() {
                   <div className="bg-amber-50 p-4 rounded-xl text-amber-800 border border-amber-100 mt-6">
                     <p className="text-sm m-0 flex gap-3 items-start">
                       <ShieldAlert className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                      <span>Hasil tes ini bersifat indikatif dan tidak dapat menggantikan diagnosis profesional dari dokter atau psikolog. Seluruh hasil tes akan dikirimkan ke pihak terkait.</span>
+                      <span>Hasil tes ini bersifat indikatif dan tidak dapat menggantikan diagnosis profesional dari dokter atau psikolog.</span>
                     </p>
                   </div>
                 </div>
@@ -301,13 +273,7 @@ export default function App() {
                 </div>
 
                 {/* Options */}
-                <div className="flex flex-col gap-3 mb-6 relative">
-                  {isSubmitting && (
-                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-xl rounded-b-none min-h-[200px]">
-                      <Loader2 className="w-8 h-8 text-brand-600 animate-spin mb-3" />
-                      <span className="text-sm font-semibold text-brand-800 bg-brand-50 px-4 py-2 rounded-full border border-brand-100">Menyimpan & Mengirim Hasil...</span>
-                    </div>
-                  )}
+                <div className="flex flex-col gap-3 mb-6">
                   {options.map((option) => (
                     <button
                       key={option.value}
