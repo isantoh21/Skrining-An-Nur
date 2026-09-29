@@ -3,7 +3,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const WAHA_BASE_URL = 'http://13.140.178.167:29001';
 const WAHA_API_KEY = 'askdj2934u9jd923dj3jdoi23nuiurio32od23oed2omi3290rmmoiejrw';
-const ADMIN_WHATSAPP = '62895359450508';
 
 export interface ScreeningData {
   name: string;
@@ -22,28 +21,7 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
     const timestamp = new Date().toISOString();
     const submissionId = `skrining_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
-    // 1. Pesan untuk Admin AN-NUR
-    const adminMessage = [
-      '📋 *HASIL SKRINING BARU (GHQ-12)*',
-      '*An-Nur Psycho Center*',
-      '──────────────────────',
-      `👤 *Nama:* ${data.name}`,
-      `🎂 *Usia:* ${data.age} tahun`,
-      `💼 *Pekerjaan:* ${data.occupation}`,
-      `📱 *No. HP/WA:* ${data.phone}`,
-      `📸 *Instagram:* ${data.instagram}`,
-      '──────────────────────',
-      `📊 *Skor Total:* ${data.score} / 36`,
-      `⚠️ *Status:* ${data.needsAttention ? 'Indikasi Distres Psikologis' : 'Normal / Stabil'}`,
-      `📝 *Keterangan:* ${
-        data.needsAttention
-          ? 'Terdapat indikasi distres psikologis atau disfungsi sosial.'
-          : 'Tidak menunjukkan indikasi distres psikologis yang signifikan.'
-      }`,
-      `⏰ *Waktu:* ${new Date().toLocaleString('id-ID')}`
-    ].join('\n');
-
-    // 2. Pesan Reminder Campaign & Reservasi untuk Peserta
+    // Pesan Reminder Campaign & Reservasi untuk Peserta
     const participantMessage = [
       `Halo Kak *${data.name}*, 👋`,
       '',
@@ -55,9 +33,9 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
       'Anda berkesempatan memenangkan *Undian Diskon Spesial* dari kami untuk layanan *Konsultasi Psikologi* atau *Psikotes* guna menindaklanjuti hasil skrining Anda.',
       '',
       '*Cara Mengikuti Campaign Sangat Mudah:*',
-      '1️⃣ *Follow* Instagram kami: @annurpsychocenter',
-      '2️⃣ *Screenshot / foto* hasil skrining Anda di website',
-      '3️⃣ *Post di Instagram Stories* Anda & tag akun *@annurpsychocenter*',
+      '1️⃣ *Follow* akun Instagram kami: @annurpsychocenter',
+      '2️⃣ *Screenshot tampilan hasil skrining di web skrining ini*',
+      '3️⃣ *Posting screenshot hasil skrining tersebut di Instagram Stories* Anda & tag akun *@annurpsychocenter*',
       '',
       '📅 *Reservasi & Konsultasi Lanjutan:*',
       'Bila Anda ingin langsung berkonsultasi, menjadwalkan psikotes, atau menanyakan seputar hasil skrining, Anda dapat *langsung membalas pesan WhatsApp ini* untuk terhubung dengan tim admin kami.',
@@ -100,27 +78,7 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
       }
     };
 
-    // Tugas 2: Kirim notifikasi WhatsApp ke Admin AN-NUR via WAHA
-    const sendAdminWhatsApp = async () => {
-      try {
-        await fetch(`${WAHA_BASE_URL}/api/sendText`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Api-Key': WAHA_API_KEY
-          },
-          body: JSON.stringify({
-            session: 'default',
-            chatId: `${ADMIN_WHATSAPP}@c.us`,
-            text: adminMessage
-          })
-        });
-      } catch {
-        // Silent fail in background
-      }
-    };
-
-    // Tugas 3: Kirim reminder campaign & info reservasi WhatsApp ke Peserta via WAHA
+    // Tugas 2: Kirim reminder campaign & info reservasi WhatsApp ke Peserta via WAHA
     const sendParticipantWhatsApp = async () => {
       try {
         let cleanPhone = data.phone.replace(/\D/g, '');
@@ -149,7 +107,7 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
       }
     };
 
-    // Tugas 4: Fallback Supabase Edge Function jika tersedia
+    // Tugas 3: Fallback Supabase Edge Function jika tersedia
     const sendEdgeFunction = async () => {
       try {
         await fetch(`${SUPABASE_URL}/functions/v1/notify-wa`, {
@@ -159,8 +117,6 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            chatId: `${ADMIN_WHATSAPP}@c.us`,
-            adminMessage,
             participantMessage,
             screening: data
           })
@@ -172,7 +128,6 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
 
     await Promise.allSettled([
       saveToSupabase(),
-      sendAdminWhatsApp(),
       sendParticipantWhatsApp(),
       sendEdgeFunction()
     ]);
