@@ -10,8 +10,37 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('intro');
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
-  const [userInfo, setUserInfo] = useState({ name: '', age: '', occupation: '', instagram: '' });
+  const [userInfo, setUserInfo] = useState({ name: '', age: '', occupation: '', phone: '', instagram: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handlePhoneChange = (val: string) => {
+    if (!val) {
+      setUserInfo(prev => ({ ...prev, phone: '' }));
+      return;
+    }
+
+    let digits = val.replace(/\D/g, '');
+    if (!digits) {
+      setUserInfo(prev => ({ ...prev, phone: '' }));
+      return;
+    }
+
+    if (digits.startsWith('0')) {
+      digits = '62' + digits.slice(1);
+    } else if (digits.startsWith('8')) {
+      digits = '62' + digits;
+    } else if (!digits.startsWith('62') && !digits.startsWith('6') && digits.length >= 1) {
+      digits = '62' + digits;
+    }
+
+    setUserInfo(prev => ({ ...prev, phone: digits.slice(0, 15) }));
+  };
+
+  const handlePhoneBlur = () => {
+    if (userInfo.phone === '6' || userInfo.phone === '62') {
+      setUserInfo(prev => ({ ...prev, phone: '' }));
+    }
+  };
 
   const handleStart = () => {
     setScreen('test');
@@ -42,6 +71,7 @@ export default function App() {
             Nama: userInfo.name,
             Usia: userInfo.age,
             Pekerjaan: userInfo.occupation,
+            Nomor_HP: userInfo.phone,
             Akun_Instagram: userInfo.instagram,
             Skor_Total: finalScore,
             Keterangan: finalNeedsAttention ? "Terdapat indikasi distres psikologis atau disfungsi sosial." : "Tidak menunjukkan indikasi distres psikologis yang signifikan."
@@ -186,6 +216,26 @@ export default function App() {
                       />
                     </div>
                     <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Nomor HP / WhatsApp</label>
+                      <input 
+                        type="tel" 
+                        inputMode="numeric"
+                        value={userInfo.phone}
+                        onChange={(e) => handlePhoneChange(e.target.value)}
+                        onBlur={handlePhoneBlur}
+                        className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-all"
+                        placeholder="Contoh: 081234567890 atau 6281234567890"
+                      />
+                      <div className="flex items-center justify-between mt-1 text-xs text-slate-500">
+                        <span>Format otomatis: <code className="text-brand-700 font-semibold bg-brand-50 px-1.5 py-0.5 rounded">62xxxxxxxxxx</code></span>
+                        {userInfo.phone && (
+                          <span className={userInfo.phone.length >= 11 ? "text-emerald-600 font-medium" : "text-amber-600 font-medium"}>
+                            {userInfo.phone.length >= 11 ? "✓ Format valid" : `${userInfo.phone.length}/11-14 digit`}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">Akun Instagram</label>
                       <input 
                         type="text" 
@@ -207,7 +257,7 @@ export default function App() {
                 
                 <button
                   onClick={handleStart}
-                  disabled={!userInfo.name || !userInfo.age || !userInfo.occupation || !userInfo.instagram}
+                  disabled={!userInfo.name || !userInfo.age || !userInfo.occupation || !userInfo.phone || userInfo.phone.length < 11 || !userInfo.instagram}
                   className="w-full sm:w-auto self-center sm:self-end flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-medium transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Mulai Tes
