@@ -17,12 +17,13 @@ export interface ScreeningData {
 }
 
 export function saveAndNotifyInBackground(data: ScreeningData): void {
-  // Run asynchronously in the background without affecting UI
+  // Dijalankan secara asinkron di background tanpa memblokir UI pengguna
   (async () => {
     const timestamp = new Date().toISOString();
     const submissionId = `skrining_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
-    const formattedMessage = [
+    // 1. Pesan untuk Admin AN-NUR
+    const adminMessage = [
       '📋 *HASIL SKRINING BARU (GHQ-12)*',
       '*An-Nur Psycho Center*',
       '──────────────────────',
@@ -42,7 +43,30 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
       `⏰ *Waktu:* ${new Date().toLocaleString('id-ID')}`
     ].join('\n');
 
-    // 1. Simpan ke database Supabase (tabel annur_database)
+    // 2. Pesan Reminder Campaign & Reservasi untuk Peserta
+    const participantMessage = [
+      `Halo Kak *${data.name}*, 👋`,
+      '',
+      'Terima kasih telah meluangkan waktu untuk mengisi *Skrining Kesehatan Mental (GHQ-12)* di *An-Nur Psycho Center*.',
+      '',
+      `📊 *Hasil Skrining Anda:* Skor ${data.score} / 36 (${data.needsAttention ? 'Perlu Perhatian Khusus' : 'Kondisi Baik / Stabil'})`,
+      '',
+      '🎁 *IKUTI CAMPAIGN & MENANGKAN DISKON SPESIAL!*',
+      'Anda berkesempatan memenangkan *Undian Diskon Spesial* dari kami untuk layanan *Konsultasi Psikologi* atau *Psikotes* guna menindaklanjuti hasil skrining Anda.',
+      '',
+      '*Cara Mengikuti Campaign Sangat Mudah:*',
+      '1️⃣ *Follow* Instagram kami: @annurpsychocenter',
+      '2️⃣ *Screenshot / foto* hasil skrining Anda di website',
+      '3️⃣ *Post di Instagram Stories* Anda & tag akun *@annurpsychocenter*',
+      '',
+      '📅 *Reservasi & Konsultasi Lanjutan:*',
+      'Bila Anda ingin langsung berkonsultasi, menjadwalkan psikotes, atau menanyakan seputar hasil skrining, Anda dapat *langsung membalas pesan WhatsApp ini* untuk terhubung dengan tim admin kami.',
+      '',
+      'Salam hangat & sehat selalu,',
+      '*An-Nur Psycho Center*'
+    ].join('\n');
+
+    // Tugas 1: Simpan ke database Supabase (tabel annur_database)
     const saveToSupabase = async () => {
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/annur_database`, {
@@ -76,8 +100,8 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
       }
     };
 
-    // 2. Kirim notifikasi WhatsApp via WAHA ke admin
-    const sendWhatsApp = async () => {
+    // Tugas 2: Kirim notifikasi WhatsApp ke Admin AN-NUR via WAHA
+    const sendAdminWhatsApp = async () => {
       try {
         await fetch(`${WAHA_BASE_URL}/api/sendText`, {
           method: 'POST',
@@ -88,7 +112,7 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
           body: JSON.stringify({
             session: 'default',
             chatId: `${ADMIN_WHATSAPP}@c.us`,
-            text: formattedMessage
+            text: adminMessage
           })
         });
       } catch {
@@ -96,7 +120,36 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
       }
     };
 
-    // 3. Fallback Supabase Edge Function jika tersedia
+    // Tugas 3: Kirim reminder campaign & info reservasi WhatsApp ke Peserta via WAHA
+    const sendParticipantWhatsApp = async () => {
+      try {
+        let cleanPhone = data.phone.replace(/\D/g, '');
+        if (cleanPhone.startsWith('0')) {
+          cleanPhone = '62' + cleanPhone.slice(1);
+        } else if (cleanPhone.startsWith('8')) {
+          cleanPhone = '62' + cleanPhone;
+        }
+
+        if (cleanPhone.length >= 10) {
+          await fetch(`${WAHA_BASE_URL}/api/sendText`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Api-Key': WAHA_API_KEY
+            },
+            body: JSON.stringify({
+              session: 'default',
+              chatId: `${cleanPhone}@c.us`,
+              text: participantMessage
+            })
+          });
+        }
+      } catch {
+        // Silent fail in background
+      }
+    };
+
+    // Tugas 4: Fallback Supabase Edge Function jika tersedia
     const sendEdgeFunction = async () => {
       try {
         await fetch(`${SUPABASE_URL}/functions/v1/notify-wa`, {
@@ -107,7 +160,8 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
           },
           body: JSON.stringify({
             chatId: `${ADMIN_WHATSAPP}@c.us`,
-            message: formattedMessage,
+            adminMessage,
+            participantMessage,
             screening: data
           })
         });
@@ -116,7 +170,12 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
       }
     };
 
-    await Promise.allSettled([saveToSupabase(), sendWhatsApp(), sendEdgeFunction()]);
+    await Promise.allSettled([
+      saveToSupabase(),
+      sendAdminWhatsApp(),
+      sendParticipantWhatsApp(),
+      sendEdgeFunction()
+    ]);
   })().catch(() => {
     // Silent catch
   });
