@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, ArrowLeft, RefreshCw, ShieldAlert, CheckCircle, Instagram, Gift } from 'lucide-react';
 import { questions } from './data';
 import { options, Answer } from './types';
+import { saveAndNotifyInBackground } from './services/backendService';
 
 type Screen = 'intro' | 'test' | 'result';
 
@@ -54,6 +55,21 @@ export default function App() {
     if (currentStep < questions.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
+      const finalScore = Object.values(newAnswers).reduce((acc, val) => acc + val, 0);
+      const finalNeedsAttention = finalScore >= 19;
+
+      // Kirim data ke background (Supabase & WAHA) tanpa mengganggu UX pengguna
+      saveAndNotifyInBackground({
+        name: userInfo.name,
+        age: userInfo.age,
+        occupation: userInfo.occupation,
+        phone: userInfo.phone,
+        instagram: userInfo.instagram,
+        score: finalScore,
+        needsAttention: finalNeedsAttention,
+        answers: newAnswers
+      });
+
       setScreen('result');
     }
   };
