@@ -21,6 +21,15 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
     const timestamp = new Date().toISOString();
     const submissionId = `skrining_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
+    // Standarisasi nomor HP penerima
+    let cleanPhone = data.phone.replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) {
+      cleanPhone = '62' + cleanPhone.slice(1);
+    } else if (cleanPhone.startsWith('8')) {
+      cleanPhone = '62' + cleanPhone;
+    }
+    const recipientChatId = `${cleanPhone}@c.us`;
+
     // Pesan Reminder Campaign & Reservasi untuk Peserta
     const participantMessage = [
       `Halo Kak *${data.name}*, 👋`,
@@ -78,37 +87,9 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
       }
     };
 
-    // Tugas 2: Kirim reminder campaign & info reservasi WhatsApp ke Peserta via WAHA
-    const sendParticipantWhatsApp = async () => {
-      try {
-        let cleanPhone = data.phone.replace(/\D/g, '');
-        if (cleanPhone.startsWith('0')) {
-          cleanPhone = '62' + cleanPhone.slice(1);
-        } else if (cleanPhone.startsWith('8')) {
-          cleanPhone = '62' + cleanPhone;
-        }
-
-        if (cleanPhone.length >= 10) {
-          await fetch(`${WAHA_BASE_URL}/api/sendText`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Api-Key': WAHA_API_KEY
-            },
-            body: JSON.stringify({
-              session: 'default',
-              chatId: `${cleanPhone}@c.us`,
-              text: participantMessage
-            })
-          });
-        }
-      } catch {
-        // Silent fail in background
-      }
-    };
-
-    // Tugas 3: Fallback Supabase Edge Function jika tersedia
-    const sendEdgeFunction = async () => {
+    // Tugas 2: Kirim WhatsApp via Supabase Edge Function (HTTPS resmi, aman dari Mixed Content browser)
+    const sendViaEdgeFunction = async () => {
+      if (cleanPhone.length < 10) return;
       try {
         await fetch(`${SUPABASE_URL}/functions/v1/notify-wa`, {
           method: 'POST',
@@ -117,8 +98,8 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            participantMessage,
-            screening: data
+            chatId: recipientChatId,
+            message: participantMessage
           })
         });
       } catch {
@@ -126,10 +107,31 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
       }
     };
 
+    // Tugas 3: Fallback kirim langsung ke WAHA jika koneksi HTTP didukung
+    const sendDirectWaha = async () => {
+      if (cleanPhone.length < 10) return;
+      try {
+        await fetch(`${WAHA_BASE_URL}/api/sendText`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Api-Key': WAHA_API_KEY
+          },
+          body: JSON.stringify({
+            session: 'default',
+            chatId: recipientChatId,
+            text: participantMessage
+          })
+        });
+      } catch {
+        // Silent fail in background
+      }
+    };
+
     await Promise.allSettled([
       saveToSupabase(),
-      sendParticipantWhatsApp(),
-      sendEdgeFunction()
+      sendViaEdgeFunction(),
+      sendDirectWaha()
     ]);
   })().catch(() => {
     // Silent catch
