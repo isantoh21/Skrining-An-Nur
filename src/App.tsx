@@ -169,7 +169,7 @@ export default function App() {
                     Tes ini dirancang untuk mengetahui tentang keluhan yang mungkin Anda alami sekarang atau akhir-akhir ini, bukan keluhan yang Anda alami di masa lalu.
                   </p>
                   <p>
-                    <strong>Instruksi:</strong> Jawablah semua 12 pertanyaan dengan memilih jawaban yang Anda pikir paling sesuai dengan kondisi Anda saat ini.
+                    <strong>Instruksi:</strong> Jawablah seluruh pertanyaan dengan memilih jawaban yang Anda pikir paling sesuai dengan kondisi Anda saat ini.
                   </p>
 
                   <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 my-6 shadow-sm">

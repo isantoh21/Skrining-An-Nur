@@ -25,7 +25,7 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
     const participantMessage = [
       `Halo Kak *${data.name}*, 👋`,
       '',
-      'Terima kasih telah meluangkan waktu untuk mengisi *Skrining Kesehatan Mental (GHQ-12)* di *An-Nur Psycho Center*.',
+      'Terima kasih telah meluangkan waktu untuk mengisi *Skrining Kesehatan Mental* di *An-Nur Psycho Center*.',
       '',
       `📊 *Hasil Skrining Anda:* Skor ${data.score} / 36 (${data.needsAttention ? 'Perlu Perhatian Khusus' : 'Kondisi Baik / Stabil'})`,
       '',
@@ -56,7 +56,7 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
           },
           body: JSON.stringify({
             id: submissionId,
-            category: 'skrining_ghq12',
+            category: 'skrining',
             data: {
               nama: data.name,
               usia: data.age,
