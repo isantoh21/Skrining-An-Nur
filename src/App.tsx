@@ -379,7 +379,7 @@ export default function App() {
                 <div className="w-full bg-gradient-to-br from-brand-50 to-emerald-50 border border-brand-100 rounded-2xl p-6 mb-8 text-left shadow-sm">
                   <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-brand-900">
                     <Gift className="w-6 h-6 text-brand-600" />
-                    Menangkan Voucher Konseling!
+                    Ikuti Campaign & Menangkan Diskon Spesial!
                   </h3>
                   
                   {/* Instagram Illustration */}
@@ -425,14 +425,30 @@ export default function App() {
                   </div>
 
                   <p className="text-sm mb-4 text-brand-800 font-medium text-center">
-                    Anda berkesempatan memenangkan voucher diskon konseling di <strong>An-Nur Psycho Center</strong> yang akan diundi oleh pihak biro.
+                    Anda berkesempatan memenangkan <strong>Undian Diskon Spesial</strong> dari kami untuk layanan <strong>Konsultasi Psikologi</strong> atau <strong>Psikotes</strong> guna menindaklanjuti hasil skrining Anda.
                   </p>
-                  <div className="bg-white/80 p-4 rounded-xl text-sm border border-brand-200 text-center">
-                    <span className="block mb-2 text-xs uppercase tracking-wider text-brand-600 font-bold">Cara Ikut:</span>
-                    Jangan lupa <strong>follow</strong> akun kami, <br/>foto/screenshot hasil skrining ini, lalu <br/><strong>post di Insta Stories</strong> Anda dan tag: <br/>
-                    <a href="https://instagram.com/annurpsychocenter" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-1 mt-3 text-white bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 px-4 py-1.5 rounded-full font-bold shadow-sm hover:scale-105 transition-transform">
-                      <Instagram className="w-4 h-4" /> @annurpsychocenter
-                    </a>
+
+                  <div className="bg-white/90 p-5 rounded-2xl text-sm border border-brand-200 text-left space-y-3">
+                    <span className="block mb-2 text-xs uppercase tracking-wider text-brand-700 font-bold">
+                      Cara Mengikuti Campaign Sangat Mudah:
+                    </span>
+                    <div className="flex items-start gap-2.5 text-slate-700">
+                      <span className="flex-shrink-0 font-bold text-brand-600">1️⃣</span>
+                      <span><strong>Follow</strong> akun Instagram kami: <a href="https://instagram.com/annurpsychocenter" target="_blank" rel="noreferrer" className="text-brand-600 font-semibold underline">@annurpsychocenter</a></span>
+                    </div>
+                    <div className="flex items-start gap-2.5 text-slate-700">
+                      <span className="flex-shrink-0 font-bold text-brand-600">2️⃣</span>
+                      <span><strong>Screenshot tampilan hasil skrining di web skrining</strong></span>
+                    </div>
+                    <div className="flex items-start gap-2.5 text-slate-700">
+                      <span className="flex-shrink-0 font-bold text-brand-600">3️⃣</span>
+                      <span><strong>Posting screenshot hasil skrining tersebut di Instagram Stories</strong> Anda & tag akun <strong>@annurpsychocenter</strong></span>
+                    </div>
+                    <div className="pt-3 border-t border-brand-100 text-center">
+                      <a href="https://instagram.com/annurpsychocenter" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-1.5 text-white bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 px-5 py-2.5 rounded-full font-bold shadow-sm hover:scale-105 transition-transform text-xs">
+                        <Instagram className="w-4 h-4" /> Buka Instagram @annurpsychocenter
+                      </a>
+                    </div>
                   </div>
                 </div>
 
