@@ -34,7 +34,7 @@ export function saveAndNotifyInBackground(data: ScreeningData): void {
       '',
       '*Cara Mengikuti Campaign Sangat Mudah:*',
       '1️⃣ *Follow* akun Instagram kami: @annurpsychocenter',
-      '2️⃣ *Screenshot tampilan hasil skrining di web skrining ini*',
+      '2️⃣ *Screenshot tampilan hasil skrining di web skrining*',
       '3️⃣ *Posting screenshot hasil skrining tersebut di Instagram Stories* Anda & tag akun *@annurpsychocenter*',
       '',
       '📅 *Reservasi & Konsultasi Lanjutan:*',
